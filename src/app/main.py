@@ -1,5 +1,5 @@
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Depends, Query
+from fastapi import FastAPI, Depends
 
 from src.app.repository import DataRepository
 from src.app.services import RecommendationService

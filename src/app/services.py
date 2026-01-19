@@ -14,6 +14,9 @@ class RecommendationService:
         self.BRAND_LIMIT = settings.brand_limit
 
     def calculate_global_top(self) -> list:
+        """
+        Рассчитать глобальный (общий) топ рекомендаций.
+        """
         df = self.repo.get_all_data()
 
         df['u_click'] = df.index.where(df['click'] > 0)
@@ -38,11 +41,17 @@ class RecommendationService:
         finally:
             df.drop(columns=['u_click', 'u_cart', 'u_purchase'], inplace=True)
 
-    def _apply_brand_limit(self, df: pd.DataFrame):
+    def _apply_brand_limit(self, df: pd.DataFrame) -> pd.DataFrame:
+        """
+        Применить ограничение на N товаров одного бренда.
+        """
         brand_occurrence = df.groupby('brand').cumcount()
         return df[brand_occurrence < self.BRAND_LIMIT]
 
     def get_recommendations(self, user_id: int) -> list:
+        """
+        Получить топ рекомендаций.
+        """
         user_history = self.repo.get_user_history(user_id)
 
         if user_history is None:
@@ -51,6 +60,9 @@ class RecommendationService:
         return self._calculate_personalized_recs(user_history)
     
     def _calculate_personalized_recs(self, user_df: pd.DataFrame) -> list:
+        """
+        Рассчитать персонализированный топ рекомендаций.
+        """
         purchased_pids = user_df[user_df['purchase'] > 0]['pid'].unique()
         interest_df = user_df[~user_df['pid'].isin(purchased_pids)]
         global_top = self.repo.get_global_top()
